@@ -1,3 +1,10 @@
+# Xcode
+*.xcuserdatad
+*.xccheckout
+xcuserdata
+
+# CocoaPods
+# Pods/  (Uncomment this if you choose NOT to commit Pods)
 
 build/*
 *~.nib

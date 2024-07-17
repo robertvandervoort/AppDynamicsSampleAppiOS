@@ -1,24 +1,30 @@
 //
 //  BreadcrumbViewController.swift
 //  AppDSampleAppiOS
-
+//  Added GPS data - Robert Vandervoort 7-11-24
 import UIKit
 import ADEUMInstrumentation
+import CoreLocation // Import CoreLocation
 
-
-class BreadcrumbViewController: GenericLabelViewController {
+class BreadcrumbViewController: GenericLabelViewController, CLLocationManagerDelegate {
 
     @IBOutlet var breadcrumbButton: UIButton!
     @IBOutlet var resultLabel: UILabel!
 
+    let locationManager = CLLocationManager() // Create a location manager
+
     override func viewDidLoad() {
         super.viewDidLoad()
-        label.setFormatted(html: "<p>For this demo, the word \"sample2\" (to correspond to the second example in the sample code snippet shown for this feature) is hard coded as the breadcrumb value, but in your code the breadcrumb value can be any string of your choosing.</p>")
-    }
-    
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        resultLabel.alpha = 0.0
+        label.setFormatted(html: "<p>For this demo, the word \"sample2\" (to correspond to the second example in the sample code snippet shown for this feature) is hard coded as the breadcrumb value and we will try to pass the user's latitude and longitude as well as an example of things you might want in a breadcrub, but in your code the breadcrumb value can be any string of your choosing.</p>")
+        
+        // Request location authorization
+        locationManager.requestWhenInUseAuthorization()
+        
+        // Set up location manager
+        locationManager.delegate = self
+        locationManager.desiredAccuracy = kCLLocationAccuracyBest
+        locationManager.requestWhenInUseAuthorization() // Request location permission
+        locationManager.startUpdatingLocation()
     }
 
     @IBAction func breadcrumbButtonTapped(_ sender: Any) {
@@ -64,15 +70,54 @@ class BreadcrumbViewController: GenericLabelViewController {
         // Leave a breadcrumb with the value "sample2",
         // which gets sent upon end of session or after
         // any crash.
-        ADEumInstrumentation.leaveBreadcrumb("sample2", mode:
-            ADEumBreadcrumbVisibility.crashesAndSessions)
+        // Check if we have a location available
+        if let location = locationManager.location {
+            let latitude = location.coordinate.latitude
+            let longitude = location.coordinate.longitude
+            let breadcrumbMessage = "sample2 (lat: \(latitude), lon: \(longitude))"
+            ADEumInstrumentation.leaveBreadcrumb(breadcrumbMessage, mode: .crashesAndSessions)
+        } else {
+            ADEumInstrumentation.leaveBreadcrumb("sample2 (No location yet)", mode: .crashesAndSessions)
+        }
 
-        // end example
-        
         indicateBreadcrumbGenerated()
-        
+        // end example
     }
     
+    func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+            switch manager.authorizationStatus {
+            case .authorizedWhenInUse, .authorizedAlways:
+                // Start updating location
+                locationManager.startUpdatingLocation()
+            case .denied, .restricted:
+                // Handle the case where location services are not authorized
+                print("Location services not authorized.")
+            default:
+                break
+            }
+        }
+    
+    // CLLocationManagerDelegate function to handle location updates
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        if let location = locations.last {
+            let latitude = location.coordinate.latitude
+            let longitude = location.coordinate.longitude
+            
+            // Create the breadcrumb message with the location data included
+            let breadcrumbMessage = "sample2 (lat: \(latitude), lon: \(longitude))"
+            
+            ADEumInstrumentation.leaveBreadcrumb(breadcrumbMessage, mode: .crashesAndSessions)
+        } else {
+            ADEumInstrumentation.leaveBreadcrumb("Location data unavailable", mode: .crashesAndSessions)
+            print("Error: Location data is currently unavailable.")
+        }
+    }
+    
+    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        ADEumInstrumentation.leaveBreadcrumb("Location error: \(error.localizedDescription)", mode: .crashesAndSessions)
+        print("Error getting location: \(error.localizedDescription)")
+    }
+
     func indicateBreadcrumbGenerated() {
         
         // Temporarily replace the "Generate Breadcrumb" button with a label to

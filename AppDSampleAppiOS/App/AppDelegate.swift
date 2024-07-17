@@ -58,10 +58,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         // Change this URL to the one provided for your account.
         // To try it locally with no collector, use localhost.
-        config.collectorURL = "http://localhost:9001"
+        config.collectorURL = "https://col.eum-appdynamics.com "
+        config.screenshotURL = "https://image.eum-appdynamics.com "
         
-        // Change this URL to the one provided for your account.
-        config.screenshotURL = "http://localhost:9001"
+        ADEumInstrumentation.initWith(config)
         config.loggingLevel = .all
         config.screenshotsEnabled = true // true is default, so this line is optional
         config.anrDetectionEnabled = true

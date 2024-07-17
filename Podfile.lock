@@ -1,0 +1,20 @@
+PODS:
+  - AppDynamicsAgent (2024.4.0)
+  - WiremockClient (2.1.0)
+
+DEPENDENCIES:
+  - AppDynamicsAgent
+  - WiremockClient
+
+SPEC REPOS:
+  trunk:
+    - AppDynamicsAgent
+    - WiremockClient
+
+SPEC CHECKSUMS:
+  AppDynamicsAgent: 88983e6829ad5ebd68055e32c5f6fd966abadf0c
+  WiremockClient: 2c56f24cbcbba2d8a45417c377797126b6bd9262
+
+PODFILE CHECKSUM: ed9d1853e7fb4fc267ea88319080bfcb2e200ba6
+
+COCOAPODS: 1.15.2
